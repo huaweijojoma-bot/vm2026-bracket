@@ -48,7 +48,6 @@
   .div { height:1px;background:rgba(100,160,210,0.2);margin:2px 0; }
   .fc { width:158px;background:rgba(255,255,255,0.5);border:1.5px dashed #A8C8E0;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;padding:4px;height:72px; }
   .fc.done-fc { background:rgba(220,248,232,0.6);border-color:#60B880;border-style:solid; }
-  .fc.live-fc { background:rgba(255,235,210,0.7);border-color:#D06000;border-style:solid;border-width:2px; }
   .fl { font-size:9.5px;color:#1A3060;text-align:center;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;font-weight:500; }
   .fl.dim { color:#7098B8;font-weight:400;font-style:italic; }
   .fl.win { color:#0A6020;font-weight:700; }
@@ -114,8 +113,6 @@
 <div class="scroll-hint">← Svep åt sidan för hela bracketen →</div>
 
 <script>
-const API_KEY = "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";
-
 let state = {
   r32: {
     m73:{t1:"🇿🇦 Sydafrika",       s1:0, t2:"🇨🇦 Kanada",         s2:1, st:"F",p:null},
@@ -146,14 +143,10 @@ let state = {
     m96:{t1:"🇨🇭 Schweiz",   s1:null,t2:"🇨🇴 Colombia", s2:null,st:"",p:null, date:"7/7 Vancouver"},
   },
   qf: {
-    qf1:{t1:"🇫🇷 Frankrike", t2:"🇲🇦 Marocko",  st:"", date:"9/7 Boston"},
-    qf2:{t1:"🇳🇴 Norge",     t2:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 England",  st:"", date:"11/7 Miami"},
-    qf3:{t1:"🇵🇹 Portugal",  t2:"🇧🇪 Belgien",  st:"", date:"10/7 Dallas"},
-    qf4:{t1:"🇦🇷 Argentina", t2:"?",            st:"", date:"11/7 Kansas City"},
-  },
-  sf: {
-    sf1:{t1:"?",t2:"?",st:"",date:"14/7"},
-    sf2:{t1:"?",t2:"?",st:"",date:"15/7"},
+    qf1:{t1:"🇫🇷 Frankrike", t2:"🇲🇦 Marocko",  s1:null,s2:null,st:"", date:"9/7 Boston"},
+    qf2:{t1:"🇳🇴 Norge",     t2:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 England",  s1:null,s2:null,st:"", date:"11/7 Miami"},
+    qf3:{t1:"🇵🇹 Portugal",  t2:"🇧🇪 Belgien",  s1:null,s2:null,st:"", date:"10/7 Dallas"},
+    qf4:{t1:"🇦🇷 Argentina", t2:"?",            s1:null,s2:null,st:"", date:"11/7 Kansas City"},
   }
 };
 
@@ -164,32 +157,31 @@ function win(m){
   return m.s1>m.s2?m.t1:m.s2>m.s1?m.t2:null;
 }
 
-function mcCard(m, date){
+function mcCard(m,date){
   if(!m)return'';
   const w=win(m);
-  const isPens=m.st==="P", isDone=m.st==="F"||isPens, isLive=m.st==="L";
+  const isPens=m.st==="P",isDone=m.st==="F"||isPens,isLive=m.st==="L";
   let cls="mc";
-  if(isLive)cls+=" live"; else if(isPens)cls+=" pens"; else if(isDone)cls+=" done";
+  if(isLive)cls+=" live";else if(isPens)cls+=" pens";else if(isDone)cls+=" done";
   const row=(t,s,won,pw)=>{
     const nc=pw?'tn pwn':won?'tn wn':'tn';
     const sc=pw?'ts pwsc':won?'ts wsc':s!==null?'ts':'ts dash';
     const el=isDone&&!won&&!pw;
     return `<div class="tr${pw?' pw':won?' w':''}" style="${el?'opacity:0.45':''}"><span class="${nc}">${t}</span><span class="${sc}">${s!==null?s:'–'}</span></div>`;
   };
-  const pw1=isPens&&m.p===m.t1, pw2=isPens&&m.p===m.t2;
+  const pw1=isPens&&m.p===m.t1,pw2=isPens&&m.p===m.t2;
   let ex='';
   if(isPens)ex=`<div class="pnote">${m.p} vann på straff</div>`;
   if(isLive)ex=`<div class="lnote">● PÅGÅR NU</div>`;
-  return `<div class="${cls}"><div class="mdate">${date||''}</div>${row(m.t1,m.s1,w===m.t1&&!isPens,pw1)}<div class="div"></div>${row(m.t2,m.s2,w===m.t2&&!isPens,pw2)}${ex}</div>`;
+  return `<div class="${cls}"><div class="mdate">${date||m.date||''}</div>${row(m.t1,m.s1,w===m.t1&&!isPens,pw1)}<div class="div"></div>${row(m.t2,m.s2,w===m.t2&&!isPens,pw2)}${ex}</div>`;
 }
 
 function fcCard(t1,t2,date,done){
   const cls="fc"+(done?" done-fc":"");
-  const s1=done?'fl win':'fl', s2=done?'fl win':'fl';
-  return `<div class="${cls}"><div class="${t1?s1:'fl dim'}">${t1||'TBD'}</div><div class="fdiv"></div><div class="${t2?s2:'fl dim'}">${t2||'TBD'}</div>${date?`<div class="fd">${date}</div>`:''}</div>`;
+  return `<div class="${cls}"><div class="${t1?'fl':'fl dim'}">${t1||'TBD'}</div><div class="fdiv"></div><div class="${t2?'fl':'fl dim'}">${t2||'TBD'}</div>${date?`<div class="fd">${date}</div>`:''}</div>`;
 }
 
-function col(items,H){ return `<div class="bcol" style="width:162px;height:${H}px">${items.join('')}</div>`; }
+function col(items,H){return `<div class="bcol" style="width:162px;height:${H}px">${items.join('')}</div>`;}
 
 function conn(count,side,H){
   const W=24;let h='';
@@ -210,40 +202,30 @@ function conn(count,side,H){
   return `<div class="conn" style="width:${W}px;height:${H}px">${h}</div>`;
 }
 
-function goldConn(H){ return `<div class="conn" style="width:24px;height:${H}px"><div class="cg" style="left:0;top:50%;width:24px;height:2px;transform:translateY(-50%)"></div></div>`; }
+function goldConn(H){return `<div class="conn" style="width:24px;height:${H}px"><div class="cg" style="left:0;top:50%;width:24px;height:2px;transform:translateY(-50%)"></div></div>`;}
 
 function render(){
-  const H=640;
-  const r=state.r32, r16=state.r16, qf=state.qf;
-
-  const lR32=[mcCard(r.m75,'29/6'),mcCard(r.m77,'30/6'),mcCard(r.m73,'28/6'),mcCard(r.m76,'30/6'),mcCard(r.m74,'29/6'),mcCard(r.m78,'30/6'),mcCard(r.m79,'1/7'),mcCard(r.m80,'2/7')];
-  const lR16=[mcCard(r16.m89),mcCard(r16.m90),mcCard(r16.m91),mcCard(r16.m92)].map((c,i)=>{
-    const m=[r16.m89,r16.m90,r16.m91,r16.m92][i];
-    return mcCard(m, m.date);
-  });
+  const H=640,r=state.r32,r16=state.r16,qf=state.qf;
+  const lR32=[mcCard(r.m75),mcCard(r.m77),mcCard(r.m73),mcCard(r.m76),mcCard(r.m74),mcCard(r.m78),mcCard(r.m79),mcCard(r.m80)];
+  const lR16=[mcCard(r16.m89),mcCard(r16.m90),mcCard(r16.m91),mcCard(r16.m92)];
   const lQF=[
-    fcCard(win(r16.m89)||'Vinnare M89', win(r16.m90)||'Vinnare M90', qf.qf1.date, qf.qf1.st==="F"),
-    fcCard(win(r16.m91)||'Vinnare M91', win(r16.m92)||'Vinnare M92', qf.qf2.date, qf.qf2.st==="F"),
+    fcCard(win(r16.m89)||'Vinnare M89',win(r16.m90)||'Vinnare M90',qf.qf1.date,qf.qf1.st==="F"),
+    fcCard(win(r16.m91)||'Vinnare M91',win(r16.m92)||'Vinnare M92',qf.qf2.date,qf.qf2.st==="F"),
   ];
-  const lSF=[fcCard(qf.qf1.winner||'Vinnare KF1', qf.qf2.winner||'Vinnare KF2','14–15 jul',false)];
-
-  const rR32=[mcCard(r.m81,'2/7'),mcCard(r.m82,'2/7'),mcCard(r.m83,'3/7'),mcCard(r.m84,'3/7'),mcCard(r.m85,'3/7'),mcCard(r.m86,'4/7'),mcCard(r.m87,'4/7'),mcCard(r.m88,'5/7')];
-  const rR16=[mcCard(r16.m94,r16.m94.date),mcCard(r16.m93,r16.m93.date),mcCard(r16.m96,r16.m96.date),mcCard(r16.m95,r16.m95.date)];
+  const lSF=[fcCard(qf.qf1.winner||'Vinnare KF1',qf.qf2.winner||'Vinnare KF2','14–15 jul',false)];
+  const rR32=[mcCard(r.m81),mcCard(r.m82),mcCard(r.m83),mcCard(r.m84),mcCard(r.m85),mcCard(r.m86),mcCard(r.m87),mcCard(r.m88)];
+  const rR16=[mcCard(r16.m94),mcCard(r16.m93),mcCard(r16.m96),mcCard(r16.m95)];
   const rQF=[
-    fcCard(win(r16.m94)||'Vinnare M94', win(r16.m93)||'Vinnare M93', qf.qf3.date, qf.qf3.st==="F"),
-    fcCard(win(r16.m95)||'Vinnare M95', win(r16.m96)||'Vinnare M96', qf.qf4.date, qf.qf4.st==="F"),
+    fcCard(win(r16.m94)||'Vinnare M94',win(r16.m93)||'Vinnare M93',qf.qf3.date,qf.qf3.st==="F"),
+    fcCard(win(r16.m95)||'Vinnare M95',win(r16.m96)||'Vinnare M96',qf.qf4.date,qf.qf4.st==="F"),
   ];
-  const rSF=[fcCard(qf.qf3.winner||'Vinnare KF3', qf.qf4.winner||'Vinnare KF4','14–15 jul',false)];
-
+  const rSF=[fcCard(qf.qf3.winner||'Vinnare KF3',qf.qf4.winner||'Vinnare KF4','14–15 jul',false)];
   const fin=`<div class="fin-wrap" style="height:${H}px"><div class="fin-inner"><div class="fin-trophy">🏆</div><div class="fin-title">VM-Final</div><div class="fin-date">19 juli 2026<br>MetLife Stadium<br>New Jersey</div><div class="fin-teams">Vinnare SF1<br>vs<br>Vinnare SF2</div></div></div>`;
-
   document.getElementById('bracket').innerHTML=
     col(lR32,H)+conn(4,'r',H)+col(lR16,H)+conn(2,'r',H)+col(lQF,H)+conn(1,'r',H)+col(lSF,H)+goldConn(H)+
     fin+goldConn(H)+
     col(rSF,H)+conn(1,'l',H)+col(rQF,H)+conn(2,'l',H)+col(rR16,H)+conn(4,'l',H)+col(rR32,H);
-
-  const done=Object.values(state.r32).filter(m=>m.st==="F"||m.st==="P").length +
-             Object.values(state.r16).filter(m=>m.st==="F"||m.st==="P").length;
+  const done=Object.values(state.r32).filter(m=>m.st==="F"||m.st==="P").length+Object.values(state.r16).filter(m=>m.st==="F"||m.st==="P").length;
   document.getElementById('doneCount').textContent=done+' matcher spelade';
 }
 
@@ -264,12 +246,7 @@ async function updateResults(){
     return `${k}: ${m.t1} vs ${m.t2} (${s})`;
   }).join('\n');
 
-  try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,
-        messages:[{role:'user',content:`Du är fotbollsresultatsexpert för VM 2026. Datum idag: 7 juli 2026.
+  const prompt=`Du är fotbollsresultatsexpert för VM 2026. Datum idag: 7 juli 2026.
 
 R16-matcher:
 ${r16list}
@@ -278,22 +255,23 @@ Kvartsfinaler:
 ${qflist}
 
 Uppdatera med senaste kända resultat. Svara ENBART med JSON (inga backticks):
-{
-  "r16": [{"id":"m89","s1":0,"s2":1,"st":"F","p":null},...],
-  "qf": [{"id":"qf1","t1":"🇫🇷 Frankrike","s1":2,"t2":"🇲🇦 Marocko","s2":1,"st":"F","p":null,"winner":"🇫🇷 Frankrike"},...],
-  "note":"kommentar"
-}
-Status: F=avgjord, P=straff, L=pågår, ""=ej spelad. Inkludera alla matcher.`}]
-      })
+{"r16":[{"id":"m89","s1":0,"s2":1,"st":"F","p":null},...],
+"qf":[{"id":"qf1","t1":"🇫🇷 Frankrike","s1":2,"t2":"🇲🇦 Marocko","s2":1,"st":"F","p":null,"winner":"🇫🇷 Frankrike"},...],
+"note":"kommentar"}
+Status: F=avgjord, P=straff, L=pågår, ""=ej spelad. Inkludera alla matcher.`;
+
+  try {
+    // Anropar Netlify-funktionen säkert på servern
+    const res=await fetch('/.netlify/functions/update',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
     });
-
-    const data=await res.json();
-    const text=(data.content||[]).find(b=>b.type==='text')?.text||'';
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const text=await res.text();
     const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
-
     if(parsed.r16)(parsed.r16).forEach(u=>{if(state.r16[u.id])state.r16[u.id]={...state.r16[u.id],s1:u.s1,s2:u.s2,st:u.st,p:u.p||null};});
-    if(parsed.qf)(parsed.qf).forEach(u=>{if(state.qf[u.id])state.qf[u.id]={...state.qf[u.id],t1:u.t1,t2:u.t2,s1:u.s1,s2:u.s2,st:u.st,p:u.p||null,winner:u.winner||null};});
-
+    if(parsed.qf)(parsed.qf).forEach(u=>{if(state.qf[u.id])state.qf[u.id]={...state.qf[u.id],s1:u.s1,s2:u.s2,st:u.st,p:u.p||null,winner:u.winner||null};});
     render();
     if(parsed.note){noteBox.textContent='✓ '+parsed.note;noteBox.style.display='block';}
     lastUp.textContent='Uppdaterad '+new Date().toLocaleTimeString('sv-SE');
@@ -301,7 +279,6 @@ Status: F=avgjord, P=straff, L=pågår, ""=ej spelad. Inkludera alla matcher.`}]
   } catch(e){
     errorBox.textContent='Kunde inte hämta resultat: '+e.message;
     errorBox.style.display='block';
-    console.error(e);
   }
   btn.disabled=false;icon.textContent='⟳';txt.textContent='Uppdatera resultat med AI';
 }
