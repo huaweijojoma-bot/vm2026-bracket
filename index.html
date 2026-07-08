@@ -48,6 +48,7 @@
   .div { height:1px;background:rgba(100,160,210,0.2);margin:2px 0; }
   .fc { width:158px;background:rgba(255,255,255,0.5);border:1.5px dashed #A8C8E0;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;padding:4px;height:72px; }
   .fc.done-fc { background:rgba(220,248,232,0.6);border-color:#60B880;border-style:solid; }
+  .fc.live-fc { background:rgba(255,235,210,0.7);border-color:#D06000;border-style:solid;border-width:2px; }
   .fl { font-size:9.5px;color:#1A3060;text-align:center;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;font-weight:500; }
   .fl.dim { color:#7098B8;font-weight:400;font-style:italic; }
   .fl.win { color:#0A6020;font-weight:700; }
@@ -58,7 +59,7 @@
   .fin-trophy { font-size:26px;margin-bottom:4px; }
   .fin-title  { font-size:10px;font-weight:900;color:#7A5A00;letter-spacing:2px;text-transform:uppercase; }
   .fin-date   { font-size:8px;color:#907020;margin-top:4px;line-height:1.6; }
-  .fin-teams  { margin-top:8px;padding:6px;background:rgba(255,255,255,0.6);border-radius:7px;border:1px dashed #C9A227;font-size:8px;color:#7A6020;font-style:italic;line-height:1.9; }
+  .fin-sf     { margin-top:6px;font-size:8.5px;color:#1A3060;font-weight:500; }
   .conn { position:relative;flex-shrink:0; }
   .cl { position:absolute;background:#90C0DC; }
   .cg { position:absolute;background:#C9A227; }
@@ -73,7 +74,7 @@
 
 <div class="update-bar">
   <button class="btn" id="btnUpdate" onclick="updateResults()">
-    <span id="btnIcon">⟳</span><span id="btnText">Uppdatera resultat med AI</span>
+    <span id="btnIcon">⟳</span><span id="btnText">Uppdatera alla resultat med AI</span>
   </button>
   <div class="meta">
     <span><span style="color:#1A8A3A">●</span> Spelad</span>
@@ -113,25 +114,28 @@
 <div class="scroll-hint">← Svep åt sidan för hela bracketen →</div>
 
 <script>
-let state = {
+// All matches — AI updates ALL rounds
+let S = {
+  // R32 — alla klara
   r32: {
-    m73:{t1:"🇿🇦 Sydafrika",       s1:0, t2:"🇨🇦 Kanada",         s2:1, st:"F",p:null},
-    m74:{t1:"🇧🇷 Brasilien",       s1:2, t2:"🇯🇵 Japan",           s2:1, st:"F",p:null},
-    m75:{t1:"🇩🇪 Tyskland",        s1:1, t2:"🇵🇾 Paraguay",        s2:1, st:"P",p:"🇵🇾 Paraguay"},
-    m76:{t1:"🇳🇱 Nederländerna",   s1:1, t2:"🇲🇦 Marocko",         s2:1, st:"P",p:"🇲🇦 Marocko"},
-    m77:{t1:"🇫🇷 Frankrike",      s1:3, t2:"🇸🇪 Sverige",          s2:0, st:"F",p:null},
-    m78:{t1:"🇨🇮 Elfenbenskusten",s1:1, t2:"🇳🇴 Norge",            s2:2, st:"F",p:null},
-    m79:{t1:"🇲🇽 Mexiko",         s1:2, t2:"🇪🇨 Ecuador",          s2:0, st:"F",p:null},
-    m80:{t1:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 England",         s1:2, t2:"🇨🇩 DR Kongo",        s2:1, st:"F",p:null},
-    m81:{t1:"🇺🇸 USA",            s1:2, t2:"🇧🇦 Bosnien-H.",      s2:0, st:"F",p:null},
-    m82:{t1:"🇧🇪 Belgien",        s1:3, t2:"🇸🇳 Senegal",          s2:2, st:"P",p:"🇧🇪 Belgien"},
-    m83:{t1:"🇵🇹 Portugal",       s1:1, t2:"🇭🇷 Kroatien",         s2:1, st:"P",p:"🇵🇹 Portugal"},
-    m84:{t1:"🇪🇸 Spanien",        s1:3, t2:"🇦🇹 Österrike",        s2:0, st:"F",p:null},
-    m85:{t1:"🇨🇭 Schweiz",        s1:2, t2:"🇩🇿 Algeriet",         s2:0, st:"F",p:null},
-    m86:{t1:"🇦🇷 Argentina",      s1:2, t2:"🇨🇻 Kap Verde",        s2:2, st:"P",p:"🇦🇷 Argentina"},
-    m87:{t1:"🇦🇺 Australien",     s1:1, t2:"🇪🇬 Egypten",          s2:1, st:"P",p:"🇪🇬 Egypten"},
-    m88:{t1:"🇨🇴 Colombia",       s1:1, t2:"🇬🇭 Ghana",            s2:0, st:"F",p:null},
+    m73:{t1:"🇿🇦 Sydafrika",       s1:0, t2:"🇨🇦 Kanada",         s2:1, st:"F",p:null, date:"28/6"},
+    m74:{t1:"🇧🇷 Brasilien",       s1:2, t2:"🇯🇵 Japan",           s2:1, st:"F",p:null, date:"29/6"},
+    m75:{t1:"🇩🇪 Tyskland",        s1:1, t2:"🇵🇾 Paraguay",        s2:1, st:"P",p:"🇵🇾 Paraguay", date:"29/6"},
+    m76:{t1:"🇳🇱 Nederländerna",   s1:1, t2:"🇲🇦 Marocko",         s2:1, st:"P",p:"🇲🇦 Marocko", date:"30/6"},
+    m77:{t1:"🇫🇷 Frankrike",      s1:3, t2:"🇸🇪 Sverige",          s2:0, st:"F",p:null, date:"30/6"},
+    m78:{t1:"🇨🇮 Elfenbenskusten",s1:1, t2:"🇳🇴 Norge",            s2:2, st:"F",p:null, date:"30/6"},
+    m79:{t1:"🇲🇽 Mexiko",         s1:2, t2:"🇪🇨 Ecuador",          s2:0, st:"F",p:null, date:"1/7"},
+    m80:{t1:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 England",         s1:2, t2:"🇨🇩 DR Kongo",        s2:1, st:"F",p:null, date:"2/7"},
+    m81:{t1:"🇺🇸 USA",            s1:2, t2:"🇧🇦 Bosnien-H.",      s2:0, st:"F",p:null, date:"2/7"},
+    m82:{t1:"🇧🇪 Belgien",        s1:3, t2:"🇸🇳 Senegal",          s2:2, st:"P",p:"🇧🇪 Belgien", date:"2/7"},
+    m83:{t1:"🇵🇹 Portugal",       s1:1, t2:"🇭🇷 Kroatien",         s2:1, st:"P",p:"🇵🇹 Portugal", date:"3/7"},
+    m84:{t1:"🇪🇸 Spanien",        s1:3, t2:"🇦🇹 Österrike",        s2:0, st:"F",p:null, date:"3/7"},
+    m85:{t1:"🇨🇭 Schweiz",        s1:2, t2:"🇩🇿 Algeriet",         s2:0, st:"F",p:null, date:"3/7"},
+    m86:{t1:"🇦🇷 Argentina",      s1:2, t2:"🇨🇻 Kap Verde",        s2:2, st:"P",p:"🇦🇷 Argentina", date:"4/7"},
+    m87:{t1:"🇦🇺 Australien",     s1:1, t2:"🇪🇬 Egypten",          s2:1, st:"P",p:"🇪🇬 Egypten", date:"4/7"},
+    m88:{t1:"🇨🇴 Colombia",       s1:0, t2:"🇨🇭 Schweiz",          s2:0, st:"P",p:"🇨🇭 Schweiz", date:"7/7"},
   },
+  // R16 — alla klara
   r16: {
     m89:{t1:"🇵🇾 Paraguay",  s1:0, t2:"🇫🇷 Frankrike",  s2:1, st:"F",p:null, date:"4/7 Philadelphia"},
     m90:{t1:"🇨🇦 Kanada",    s1:0, t2:"🇲🇦 Marocko",    s2:3, st:"F",p:null, date:"4/7 Houston"},
@@ -140,24 +144,33 @@ let state = {
     m93:{t1:"🇵🇹 Portugal",  s1:1, t2:"🇪🇸 Spanien",    s2:0, st:"F",p:null, date:"6/7 Dallas"},
     m94:{t1:"🇺🇸 USA",       s1:1, t2:"🇧🇪 Belgien",    s2:4, st:"F",p:null, date:"6/7 Seattle"},
     m95:{t1:"🇦🇷 Argentina", s1:3, t2:"🇪🇬 Egypten",    s2:2, st:"F",p:null, date:"7/7 Atlanta"},
-    m96:{t1:"🇨🇭 Schweiz",   s1:null,t2:"🇨🇴 Colombia", s2:null,st:"",p:null, date:"7/7 Vancouver"},
+    m96:{t1:"🇨🇴 Colombia",  s1:0, t2:"🇨🇭 Schweiz",    s2:0, st:"P",p:"🇨🇭 Schweiz", date:"7/7 Vancouver"},
   },
+  // KVARTSFINALER
   qf: {
-    qf1:{t1:"🇫🇷 Frankrike", t2:"🇲🇦 Marocko",  s1:null,s2:null,st:"", date:"9/7 Boston"},
-    qf2:{t1:"🇳🇴 Norge",     t2:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 England",  s1:null,s2:null,st:"", date:"11/7 Miami"},
-    qf3:{t1:"🇵🇹 Portugal",  t2:"🇧🇪 Belgien",  s1:null,s2:null,st:"", date:"10/7 Dallas"},
-    qf4:{t1:"🇦🇷 Argentina", t2:"?",            s1:null,s2:null,st:"", date:"11/7 Kansas City"},
-  }
+    qf1:{t1:"🇫🇷 Frankrike", t2:"🇲🇦 Marocko",  s1:null,s2:null,st:"L",p:null,winner:null, date:"9/7 Boston"},
+    qf2:{t1:"🇳🇴 Norge",     t2:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 England",  s1:null,s2:null,st:"", p:null,winner:null, date:"11/7 Miami"},
+    qf3:{t1:"🇧🇪 Belgien",   t2:"🇵🇹 Portugal", s1:null,s2:null,st:"", p:null,winner:null, date:"10/7 Dallas"},
+    qf4:{t1:"🇦🇷 Argentina", t2:"🇨🇭 Schweiz",  s1:null,s2:null,st:"", p:null,winner:null, date:"11/7 Kansas City"},
+  },
+  // SEMIFINALER
+  sf: {
+    sf1:{t1:null,t2:null,s1:null,s2:null,st:"",p:null,winner:null, date:"14/7 Dallas"},
+    sf2:{t1:null,t2:null,s1:null,s2:null,st:"",p:null,winner:null, date:"15/7 Atlanta"},
+  },
+  // FINAL
+  fin: {t1:null,t2:null,s1:null,s2:null,st:"",p:null,winner:null}
 };
 
 function win(m){
   if(!m)return null;
-  if(m.st==="P")return m.p;
+  if(m.st==="P")return m.p||m.winner;
+  if(m.winner)return m.winner;
   if(m.st!=="F")return null;
   return m.s1>m.s2?m.t1:m.s2>m.s1?m.t2:null;
 }
 
-function mcCard(m,date){
+function mcCard(m){
   if(!m)return'';
   const w=win(m);
   const isPens=m.st==="P",isDone=m.st==="F"||isPens,isLive=m.st==="L";
@@ -173,12 +186,29 @@ function mcCard(m,date){
   let ex='';
   if(isPens)ex=`<div class="pnote">${m.p} vann på straff</div>`;
   if(isLive)ex=`<div class="lnote">● PÅGÅR NU</div>`;
-  return `<div class="${cls}"><div class="mdate">${date||m.date||''}</div>${row(m.t1,m.s1,w===m.t1&&!isPens,pw1)}<div class="div"></div>${row(m.t2,m.s2,w===m.t2&&!isPens,pw2)}${ex}</div>`;
+  return `<div class="${cls}"><div class="mdate">${m.date||''}</div>${row(m.t1,m.s1,w===m.t1&&!isPens,pw1)}<div class="div"></div>${row(m.t2,m.s2,w===m.t2&&!isPens,pw2)}${ex}</div>`;
 }
 
-function fcCard(t1,t2,date,done){
-  const cls="fc"+(done?" done-fc":"");
-  return `<div class="${cls}"><div class="${t1?'fl':'fl dim'}">${t1||'TBD'}</div><div class="fdiv"></div><div class="${t2?'fl':'fl dim'}">${t2||'TBD'}</div>${date?`<div class="fd">${date}</div>`:''}</div>`;
+function fcCard(t1,t2,date,st,s1,s2,p){
+  const isDone=st==="F"||(st==="P"&&p);
+  const isLive=st==="L";
+  const isPens=st==="P"&&p;
+  let cls="fc";
+  if(isLive)cls+=" live-fc";else if(isDone)cls+=" done-fc";
+  const w=isPens?p:(isDone&&s1!==null?(s1>s2?t1:s2>s1?t2:null):null);
+  const row=(t,s,won,pw)=>{
+    const nc=pw?'fl win':won?'fl win':t?'fl':'fl dim';
+    const el=isDone&&!won&&!pw;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:1px 4px;${el?'opacity:0.45':''}${won||pw?'background:rgba(40,160,80,0.1);border-radius:3px;':''}" >
+      <span class="${nc}" style="flex:1;font-size:9.5px">${t||'TBD'}</span>
+      ${isDone?`<span style="font-size:11px;font-weight:700;color:${won||pw?'#0A6020':'#2A4A70'};min-width:14px;text-align:right">${s!==null?s:'–'}</span>`:''}
+    </div>`;
+  };
+  const pw1=isPens&&p===t1,pw2=isPens&&p===t2;
+  let ex='';
+  if(isPens)ex=`<div class="pnote" style="font-size:7px">${p} på straff</div>`;
+  if(isLive)ex=`<div class="lnote">● PÅGÅR NU</div>`;
+  return `<div class="${cls}">${row(t1,s1,w===t1&&!isPens,pw1)}<div class="fdiv"></div>${row(t2,s2,w===t2&&!isPens,pw2)}${ex}<div class="fd">${date||''}</div></div>`;
 }
 
 function col(items,H){return `<div class="bcol" style="width:162px;height:${H}px">${items.join('')}</div>`;}
@@ -201,31 +231,46 @@ function conn(count,side,H){
   }
   return `<div class="conn" style="width:${W}px;height:${H}px">${h}</div>`;
 }
-
 function goldConn(H){return `<div class="conn" style="width:24px;height:${H}px"><div class="cg" style="left:0;top:50%;width:24px;height:2px;transform:translateY(-50%)"></div></div>`;}
 
 function render(){
-  const H=640,r=state.r32,r16=state.r16,qf=state.qf;
+  const H=640,r=S.r32,r16=S.r16,qf=S.qf,sf=S.sf,fin=S.fin;
+
   const lR32=[mcCard(r.m75),mcCard(r.m77),mcCard(r.m73),mcCard(r.m76),mcCard(r.m74),mcCard(r.m78),mcCard(r.m79),mcCard(r.m80)];
   const lR16=[mcCard(r16.m89),mcCard(r16.m90),mcCard(r16.m91),mcCard(r16.m92)];
   const lQF=[
-    fcCard(win(r16.m89)||'Vinnare M89',win(r16.m90)||'Vinnare M90',qf.qf1.date,qf.qf1.st==="F"),
-    fcCard(win(r16.m91)||'Vinnare M91',win(r16.m92)||'Vinnare M92',qf.qf2.date,qf.qf2.st==="F"),
+    fcCard(qf.qf1.t1,qf.qf1.t2,qf.qf1.date,qf.qf1.st,qf.qf1.s1,qf.qf1.s2,qf.qf1.p),
+    fcCard(qf.qf2.t1,qf.qf2.t2,qf.qf2.date,qf.qf2.st,qf.qf2.s1,qf.qf2.s2,qf.qf2.p),
   ];
-  const lSF=[fcCard(qf.qf1.winner||'Vinnare KF1',qf.qf2.winner||'Vinnare KF2','14–15 jul',false)];
+  const lSF=[fcCard(sf.sf1.t1,sf.sf1.t2,sf.sf1.date,sf.sf1.st,sf.sf1.s1,sf.sf1.s2,sf.sf1.p)];
+
   const rR32=[mcCard(r.m81),mcCard(r.m82),mcCard(r.m83),mcCard(r.m84),mcCard(r.m85),mcCard(r.m86),mcCard(r.m87),mcCard(r.m88)];
   const rR16=[mcCard(r16.m94),mcCard(r16.m93),mcCard(r16.m96),mcCard(r16.m95)];
   const rQF=[
-    fcCard(win(r16.m94)||'Vinnare M94',win(r16.m93)||'Vinnare M93',qf.qf3.date,qf.qf3.st==="F"),
-    fcCard(win(r16.m95)||'Vinnare M95',win(r16.m96)||'Vinnare M96',qf.qf4.date,qf.qf4.st==="F"),
+    fcCard(qf.qf3.t1,qf.qf3.t2,qf.qf3.date,qf.qf3.st,qf.qf3.s1,qf.qf3.s2,qf.qf3.p),
+    fcCard(qf.qf4.t1,qf.qf4.t2,qf.qf4.date,qf.qf4.st,qf.qf4.s1,qf.qf4.s2,qf.qf4.p),
   ];
-  const rSF=[fcCard(qf.qf3.winner||'Vinnare KF3',qf.qf4.winner||'Vinnare KF4','14–15 jul',false)];
-  const fin=`<div class="fin-wrap" style="height:${H}px"><div class="fin-inner"><div class="fin-trophy">🏆</div><div class="fin-title">VM-Final</div><div class="fin-date">19 juli 2026<br>MetLife Stadium<br>New Jersey</div><div class="fin-teams">Vinnare SF1<br>vs<br>Vinnare SF2</div></div></div>`;
+  const rSF=[fcCard(sf.sf2.t1,sf.sf2.t2,sf.sf2.date,sf.sf2.st,sf.sf2.s1,sf.sf2.s2,sf.sf2.p)];
+
+  const finW=win(fin);
+  const finBox=`<div class="fin-wrap" style="height:${H}px"><div class="fin-inner">
+    <div class="fin-trophy">🏆</div>
+    <div class="fin-title">VM-Final</div>
+    <div class="fin-date">19 juli 2026<br>MetLife Stadium<br>New Jersey</div>
+    ${finW?`<div class="fin-sf" style="color:#0A6020;font-weight:700;margin-top:8px">🏆 ${finW}</div>`:
+    `<div class="fin-sf">${fin.t1||'Vinnare SF1'}<br><span style="color:#90A8C0">vs</span><br>${fin.t2||'Vinnare SF2'}</div>`}
+  </div></div>`;
+
   document.getElementById('bracket').innerHTML=
     col(lR32,H)+conn(4,'r',H)+col(lR16,H)+conn(2,'r',H)+col(lQF,H)+conn(1,'r',H)+col(lSF,H)+goldConn(H)+
-    fin+goldConn(H)+
+    finBox+goldConn(H)+
     col(rSF,H)+conn(1,'l',H)+col(rQF,H)+conn(2,'l',H)+col(rR16,H)+conn(4,'l',H)+col(rR32,H);
-  const done=Object.values(state.r32).filter(m=>m.st==="F"||m.st==="P").length+Object.values(state.r16).filter(m=>m.st==="F"||m.st==="P").length;
+
+  const done=Object.values(S.r32).filter(m=>m.st==="F"||m.st==="P").length+
+             Object.values(S.r16).filter(m=>m.st==="F"||m.st==="P").length+
+             Object.values(S.qf).filter(m=>m.st==="F"||m.st==="P").length+
+             Object.values(S.sf).filter(m=>m.st==="F"||m.st==="P").length+
+             (S.fin.st==="F"||S.fin.st==="P"?1:0);
   document.getElementById('doneCount').textContent=done+' matcher spelade';
 }
 
@@ -236,32 +281,55 @@ async function updateResults(){
   btn.disabled=true;icon.innerHTML='<span class="spinner"></span>';txt.textContent='Hämtar senaste resultat…';
   noteBox.style.display='none';errorBox.style.display='none';
 
-  const r16list=Object.entries(state.r16).map(([k,m])=>{
+  const r32list=Object.entries(S.r32).map(([k,m])=>{
     let s=m.st==="F"?`${m.s1}-${m.s2} FINAL`:m.st==="P"?`${m.s1}-${m.s2} PENS (${m.p} vann)`:m.st==="L"?"PÅGÅR":"ej spelad";
     return `${k}: ${m.t1} vs ${m.t2} (${s})`;
   }).join('\n');
 
-  const qflist=Object.entries(state.qf).map(([k,m])=>{
-    let s=m.st==="F"?`${m.s1}-${m.s2} FINAL`:m.st==="L"?"PÅGÅR":"ej spelad";
+  const r16list=Object.entries(S.r16).map(([k,m])=>{
+    let s=m.st==="F"?`${m.s1}-${m.s2} FINAL`:m.st==="P"?`${m.s1}-${m.s2} PENS (${m.p} vann)`:m.st==="L"?"PÅGÅR":"ej spelad";
     return `${k}: ${m.t1} vs ${m.t2} (${s})`;
   }).join('\n');
 
-  const prompt=`Du är fotbollsresultatsexpert för VM 2026. Datum idag: 7 juli 2026.
+  const qflist=Object.entries(S.qf).map(([k,m])=>{
+    let s=m.st==="F"?`${m.s1}-${m.s2} FINAL`:m.st==="P"?`${m.s1}-${m.s2} PENS (${m.p} vann)`:m.st==="L"?"PÅGÅR":"ej spelad";
+    return `${k}: ${m.t1} vs ${m.t2} (${s})`;
+  }).join('\n');
 
-R16-matcher:
+  const sflist=Object.entries(S.sf).map(([k,m])=>{
+    let s=m.st==="F"?`${m.s1}-${m.s2} FINAL`:m.st==="P"?`${m.s1}-${m.s2} PENS (${m.p} vann)`:m.st==="L"?"PÅGÅR":"ej spelad";
+    return `${k}: ${m.t1||'TBD'} vs ${m.t2||'TBD'} (${s})`;
+  }).join('\n');
+
+  const prompt=`Du är fotbollsresultatsexpert för VM 2026. Datum idag: 9 juli 2026.
+
+R32 (alla spelade):
+${r32list}
+
+R16 (alla spelade):
 ${r16list}
 
 Kvartsfinaler:
 ${qflist}
 
-Uppdatera med senaste kända resultat. Svara ENBART med JSON (inga backticks):
-{"r16":[{"id":"m89","s1":0,"s2":1,"st":"F","p":null},...],
-"qf":[{"id":"qf1","t1":"🇫🇷 Frankrike","s1":2,"t2":"🇲🇦 Marocko","s2":1,"st":"F","p":null,"winner":"🇫🇷 Frankrike"},...],
-"note":"kommentar"}
-Status: F=avgjord, P=straff, L=pågår, ""=ej spelad. Inkludera alla matcher.`;
+Semifinaler:
+${sflist}
+
+Final: ${S.fin.t1||'TBD'} vs ${S.fin.t2||'TBD'} (${S.fin.st==="F"?S.fin.s1+'-'+S.fin.s2+' FINAL':"ej spelad"})
+
+Uppdatera med SENASTE kända resultat från VM 2026. Svara ENBART med JSON (inga backticks):
+{
+  "r32": [{"id":"m88","s1":0,"s2":0,"st":"P","p":"🇨🇭 Schweiz"}],
+  "r16": [{"id":"m96","s1":0,"s2":0,"st":"P","p":"🇨🇭 Schweiz"}],
+  "qf":  [{"id":"qf1","t1":"🇫🇷 Frankrike","s1":2,"t2":"🇲🇦 Marocko","s2":0,"st":"F","p":null,"winner":"🇫🇷 Frankrike"}],
+  "sf":  [{"id":"sf1","t1":"🇫🇷 Frankrike","t2":"🇳🇴 Norge","s1":null,"s2":null,"st":"","p":null,"winner":null}],
+  "fin": {"t1":null,"t2":null,"s1":null,"s2":null,"st":"","p":null,"winner":null},
+  "note":"kommentar om vad som uppdaterats"
+}
+Status: F=avgjord, P=straff/förlängning, L=pågår, ""=ej spelad.
+Inkludera BARA matcher som ändrats eller är relevanta. Lämna arrayer tomma [] om inget ändrats i den rundan.`;
 
   try {
-    // Anropar Netlify-funktionen säkert på servern
     const res=await fetch('/.netlify/functions/update',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -270,8 +338,13 @@ Status: F=avgjord, P=straff, L=pågår, ""=ej spelad. Inkludera alla matcher.`;
     if(!res.ok)throw new Error('HTTP '+res.status);
     const text=await res.text();
     const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
-    if(parsed.r16)(parsed.r16).forEach(u=>{if(state.r16[u.id])state.r16[u.id]={...state.r16[u.id],s1:u.s1,s2:u.s2,st:u.st,p:u.p||null};});
-    if(parsed.qf)(parsed.qf).forEach(u=>{if(state.qf[u.id])state.qf[u.id]={...state.qf[u.id],s1:u.s1,s2:u.s2,st:u.st,p:u.p||null,winner:u.winner||null};});
+
+    if(parsed.r32)(parsed.r32).forEach(u=>{if(S.r32[u.id])S.r32[u.id]={...S.r32[u.id],s1:u.s1,s2:u.s2,st:u.st,p:u.p||null};});
+    if(parsed.r16)(parsed.r16).forEach(u=>{if(S.r16[u.id])S.r16[u.id]={...S.r16[u.id],s1:u.s1,s2:u.s2,st:u.st,p:u.p||null};});
+    if(parsed.qf)(parsed.qf).forEach(u=>{if(S.qf[u.id])S.qf[u.id]={...S.qf[u.id],t1:u.t1||S.qf[u.id].t1,t2:u.t2||S.qf[u.id].t2,s1:u.s1,s2:u.s2,st:u.st,p:u.p||null,winner:u.winner||null};});
+    if(parsed.sf)(parsed.sf).forEach(u=>{if(S.sf[u.id])S.sf[u.id]={...S.sf[u.id],t1:u.t1,t2:u.t2,s1:u.s1,s2:u.s2,st:u.st,p:u.p||null,winner:u.winner||null};});
+    if(parsed.fin&&parsed.fin.t1!==undefined)S.fin={...S.fin,...parsed.fin};
+
     render();
     if(parsed.note){noteBox.textContent='✓ '+parsed.note;noteBox.style.display='block';}
     lastUp.textContent='Uppdaterad '+new Date().toLocaleTimeString('sv-SE');
@@ -280,7 +353,7 @@ Status: F=avgjord, P=straff, L=pågår, ""=ej spelad. Inkludera alla matcher.`;
     errorBox.textContent='Kunde inte hämta resultat: '+e.message;
     errorBox.style.display='block';
   }
-  btn.disabled=false;icon.textContent='⟳';txt.textContent='Uppdatera resultat med AI';
+  btn.disabled=false;icon.textContent='⟳';txt.textContent='Uppdatera alla resultat med AI';
 }
 
 render();
